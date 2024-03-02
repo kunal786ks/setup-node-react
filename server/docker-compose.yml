@@ -1,0 +1,38 @@
+version: '3'
+services:
+  node-app:
+    container_name: Backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongoDB:
+        condition: service_started
+    environment:
+      DATABASE_URL: mongodb://mongoDB:27017
+    restart: on-failure
+    command: ["npm", "run", "start"]
+    networks:
+      - catalog_app
+        
+  mongoDB:
+    container_name: db
+    image: mongo:latest
+    volumes:
+      - mongoDB:/data/db
+    restart: on-failure
+    networks:
+      - catalog_app
+
+networks:
+  catalog_app:
+    driver: bridge
+volumes:
+  mongoDB: {}
